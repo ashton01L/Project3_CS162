@@ -24,6 +24,7 @@ class LibraryTester:
 
         # Create library items
         b1 = Book("B1009653", "Brave New World", "Aldous Huxley")
+        b2 = Book("B4275142", "The Great Gatsby", "F. Scott Fitzgerald")
         a1 = Album("A888751199729", "Up All Night", "One Direction")
         m1 = Movie("M024543617907", "Fight Club", "David Fincher")
 
@@ -33,13 +34,14 @@ class LibraryTester:
 
         # Add items and patrons to the library
         self.library.add_library_item(b1)
+        self.library.add_library_item(b2)
         self.library.add_library_item(a1)
         self.library.add_library_item(m1)
         self.library.add_patron(p1)
         self.library.add_patron(p2)
 
         # Store items and patrons for later use
-        self.items = [b1, a1, m1]
+        self.items = [b1, b2, a1, m1]
         self.patrons = [p1, p2]
 
     def test_check_out_library_item(self):
