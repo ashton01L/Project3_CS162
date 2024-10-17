@@ -270,6 +270,24 @@ class Patron:
         self._checked_out_items = []  # List of currently checked out LibraryItems
         self._fine_amount = 0.0  # Initial fine amount
 
+    def get_patron_id(self):
+        """
+        Gets the patron_id, the unique identifier for each patron
+
+        :return:
+            str: The patron_id, the unique identifier for each patron
+        """
+        return self._patron_id
+
+    def get_patron_name(self):
+        """
+        Gets the name of the patron, patron_name.
+
+        :return:
+            str: The patron_name.
+        """
+        return self._name
+
     def get_fine_amount(self):
         """
         Gets the amount of the current fine
@@ -277,7 +295,10 @@ class Patron:
         :return:
             float: The amount of fines the patron currently owes.
             """
-        return self._fine_amount
+        if self._fine_amount < 0:
+            self._fine_amount = 0.0
+
+        return round(self._fine_amount, 2)
 
     def add_library_item(self, library_item):
         """
@@ -296,6 +317,9 @@ class Patron:
         Amends the amount of the fine by the specified additional amount
         """
         self._fine_amount += amount
+
+        if self._fine_amount < 0:
+            self._fine_amount = 0.0
 
 
 class Library:
@@ -328,6 +352,7 @@ class Library:
         Adds a Patron to the Library's list of members.
         """
         self._members.append(patron)
+
 
     def lookup_library_item_from_id(self, library_item_id):
         """
@@ -467,12 +492,15 @@ class Library:
             str: A message indicating the result of the fine payment
         """
         patron = self.lookup_patron_from_id(patron_id)
+        print(f"Lookup for patron '{patron_id}' resulted in: {patron}")
 
         if patron is None:
             return "patron not found"
 
         # Amend the fine
+        print(f"Amending fine for patron '{patron_id}' by ${amount:.2f}")
         patron.amend_fine(-amount)
+        print(f"New fine amount: ${patron.get_fine_amount():.2f}")
         return "payment successful"
 
     def increment_current_date(self):
@@ -485,7 +513,8 @@ class Library:
         self._current_date += 1
         for patron in self._members:
             for item in patron._checked_out_items:
-                if item.get_checked_out_by() == patron and item._date_checked_out is not None:
-                    overdue_days = self._current_date - item._date_checked_out - item.get_check_out_length()
-                    if overdue_days > 0:
-                        patron.amend_fine(0.10 * overdue_days)  # 10 cents for each overdue day
+                if item.get_location() == "CHECKED_OUT":
+                    if (self._current_date - item._date_checked_out) > item.get_check_out_length():
+                        fine_days = self._current_date - item._date_checked_out - item.get_check_out_length()
+                        if fine_days > 0:
+                            patron.amend_fine(0.10)
